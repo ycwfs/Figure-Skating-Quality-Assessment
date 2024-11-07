@@ -1,0 +1,25 @@
+root_dir: /data1/1/code/datasets/fs/finefs/
+#root_dir: /data1/1/code/datasets/fs/fs1000/
+#root_dir: /data1/1/code/datasets/fs/fisv/
+
+vocab_file: /data1/1/code/helping/bpe/bpe_simple_vocab_16e6.txt.gz
+#checkpoint_path: /data1/1/code/helping/src/cp/tes_spear_0.9896_pcs_spear_0.9909_tes_loss_5.860520996373816_pcs_loss_3.6252854522384483.pth
+checkpoint_path: /data1/1/code/helping/src/result_locate/finefs/tes_spear_0.8254_pcs_spear_0.9092_tes_loss_135.4891_pcs_loss_56.6692.pth
+
+# multi batch size cause miss match
+batch_size: 1
+learning_rate: 2e-5
+
+vocab_size: 49413
+content_length: 50
+embed_dim: 1024
+
+vaf_num_blocks: 8
+vaf_num_heads: 4
+num_blocks: 32
+num_heads: 16
+concat_strategy: embed_hack
+#concat_strategy: insert
+epoch: 50
+
+threshold: 0.6
