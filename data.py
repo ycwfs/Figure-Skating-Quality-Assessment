@@ -57,9 +57,11 @@ class MMDataset(data.Dataset):
                 split='train',  context_length=100,
                 vocab_file="/data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", 
                 num_tokens_per_video: int = 2,
+                prompt: str = "How did the athlete perform in the show?"
             ):
 
         self.st = SimpleTokenizer(vocab_file, context_length)
+        self.prompt = prompt
 
         self.root = root_dir
         self.split = split
@@ -97,6 +99,9 @@ class MMDataset(data.Dataset):
         audio_dir = os.path.join(self.audio_path, self.video_list[index] + '_vggish.npy')
         audio_feature = torch.tensor(np.load(audio_dir))
 
+        prompt_ids = torch.tensor(self.st.encode(self.prompt)).squeeze(0)
+        pad_ids = torch.tensor([self.st.pad_token])
+
         # 加载标签
         try:
             label_path = os.path.join(self.label_path, f'{self.video_list[index]}.json')
@@ -113,8 +118,8 @@ class MMDataset(data.Dataset):
     
         except Exception as e:
             print(f"Error loading label for video {self.video_list[index]}: {e}")
-
-        label = {'input_ids': input_ids, 'tes': tes, 'pcs': pcs, 'locate_label': locate_label, 'sample_name': self.video_list[index]}
+        
+        label = {'input_ids': input_ids, 'prompt_ids' : prompt_ids, 'tes': tes, 'pcs': pcs, 'locate_label': locate_label, 'sample_name': self.video_list[index], 'pad_ids': pad_ids}
 
         # no inputs, mask
         return label, video_feature, audio_feature

@@ -24,7 +24,7 @@ class AGL(nn.Module):
     def __init__(self, embed_dim: int = 1024, num_blocks: int = 8, num_heads: int = 8, max_temporal_length: int = 265,  threshold: int = 0.6):
         super().__init__()
 
-        self.threshold = threshold
+        self.threshold = nn.Parameter(torch.tensor(0.5), requires_grad=True)
         # [b,l,128] -> [b,l,1024]
         self.audio_projector = nn.Sequential(
             nn.Linear(128, int(embed_dim/2)),

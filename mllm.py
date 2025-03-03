@@ -36,6 +36,7 @@ class MMModel(nn.Module):
         self.pos_embed = nn.Parameter(
             torch.empty(1, context_length, embed_dim)
         )
+        self.context_length = context_length
 
         self.vaf = SimpleTransformer(
             embed_dim=embed_dim,
@@ -79,11 +80,13 @@ class MMModel(nn.Module):
 
         self.tes_score_head = nn.Sequential(
             nn.Linear(embed_dim ,int(embed_dim/2), bias=True),
+            nn.ReLU(),
             nn.Linear(int(embed_dim/2), 1, bias=True),
         )
 
         self.pcs_score_head = nn.Sequential(
             nn.Linear(embed_dim ,int(embed_dim/2), bias=True),
+            nn.ReLU(),
             nn.Linear(int(embed_dim/2), 1, bias=True),
         )
 
@@ -107,13 +110,13 @@ class MMModel(nn.Module):
 
         return input_embed
 
-    def forward(self, video_featuers: torch.Tensor = None, audio_features: torch.Tensor = None):
+    def forward(self, video_featuers: torch.Tensor = None, audio_features: torch.Tensor = None, input_ids: torch.Tensor = None, prompt_ids: torch.Tensor = None, pad_ids: torch.Tensor = None):
         # [bs, nos, embed_dim], [bs, nos, embed_dim], [bs, seq_len], [bs, nos], [bs, nos]
         stacked_video_segments, stacked_audio_segments, located, segments, segment_types = self.agl(video_featuers, audio_features)
         bs = stacked_video_segments.shape[0]; nos = stacked_video_segments.shape[1]; embed_dim = stacked_video_segments.shape[2]
 
         # ff [bs, nos+2, embed_dim]
-        fused_features = torch.zeros([bs, nos+2, embed_dim])
+        fused_features = torch.zeros([bs, self.context_length, embed_dim])
         for i in range(nos):
             fused_features[:, i, :] = self.vaf([stacked_video_segments[:, i, :].clone(), stacked_audio_segments[:, i, :].clone()])
 
@@ -121,23 +124,30 @@ class MMModel(nn.Module):
         
         tes = self.token_embedding(torch.tensor(self.tes,dtype=torch.int32,device=self.token_embedding.weight.device))
         pcs = self.token_embedding(torch.tensor(self.pcs,dtype=torch.int32,device=self.token_embedding.weight.device))
-        fused_features[:, -2, :] = tes
-        fused_features[:, -1, :] = pcs
+        text = self.token_embedding(torch.cat([prompt_ids, input_ids], dim=1)).squeeze(0)
+        pad = self.token_embedding(torch.tensor(pad_ids,dtype=torch.int32,device=self.token_embedding.weight.device))
+
+        t_len = text.shape[0]
+        fused_features[:, nos, :] = tes
+        fused_features[:, nos+1, :] = pcs
+        fused_features[:, nos+2:nos+2+t_len, :] = text
+        fused_features[:, nos+2+t_len:, :] = pad
         fused_features = fused_features.to(self.token_embedding.weight.device)
 
-
-        #merged_features = merged_features + self.pos_embed
+        fused_features = fused_features + self.pos_embed
         # trunk [bs, embed_dim, seq_len]
-        attn_mask = build_causal_attention_mask(nos+2).to(fused_features.device)
+        attn_mask = build_causal_attention_mask(self.context_length).to(fused_features.device)
         hidden_state = self.mllm(fused_features, attn_mask)
 
         # use tes,pcs token to regression
-        tes_state = hidden_state[:, :, -2]
-        pcs_state = hidden_state[:, :, -1]
+        tes_state = hidden_state[:, :, nos]
+        pcs_state = hidden_state[:, :, nos+1]
+        text_state = hidden_state[:, :, nos+2:]
         tes = self.tes_score_head(tes_state).reshape(-1)
         pcs = self.pcs_score_head(pcs_state).reshape(-1)
+        shift_logits = self.lm_head(text_state.transpose(1,2))[:,:-1,:].contiguous()
 
-        return tes, pcs, hidden_state, located.reshape(-1)
+        return tes, pcs, hidden_state, located.reshape(-1), shift_logits
 
 
 if __name__ == "__main__":
