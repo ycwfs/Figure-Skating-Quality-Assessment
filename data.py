@@ -53,9 +53,9 @@ def build_causal_attention_mask(context_length, top_left_square = None):
 
 
 class MMDataset(data.Dataset):
-    def __init__(self, root_dir='/data1/wangqiurui/code/datasets/fs/finefs/', 
+    def __init__(self, root_dir='/data1/1/code/datasets/fs/finefs/', 
                 split='train',  context_length=100,
-                vocab_file="/data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", 
+                vocab_file="/data1/1/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", 
                 num_tokens_per_video: int = 2,
                 prompt: str = "How did the athlete perform in the show?"
             ):

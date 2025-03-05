@@ -21,10 +21,10 @@ def build_causal_attention_mask(context_length, top_left_square = None):
 
 
 class MMModel(nn.Module):
-    def __init__(self, embed_dim: int = 1024, context_length: int = 100, vocab_size: int = 49413, num_blocks: int = 8, num_heads: int = 8, vaf_num_blocks: int = 8, vaf_num_heads: int = 8, num_tokens_per_video: int = 2):
+    def __init__(self, embed_dim: int = 1024, context_length: int = 100, vocab_size: int = 49413, num_blocks: int = 8, num_heads: int = 8, vaf_num_blocks: int = 8, vaf_num_heads: int = 8, num_tokens_per_video: int = 2, vocab_file: str = "/data1/1/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz"):
         super().__init__()
 
-        self.st = SimpleTokenizer("/data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", context_length)
+        self.st = SimpleTokenizer(vocab_file, context_length)
         self.tes = self.st.tes_token
         self.pcs = self.st.pcs_token
 

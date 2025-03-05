@@ -1,8 +1,8 @@
-root_dir: /data1/wangqiurui/code/datasets/fs/finefs/
+root_dir: /data1/1/code/datasets/fs/finefs/
 #root_dir: /data1/1/code/datasets/fs/fs1000/
 #root_dir: /data1/1/code/datasets/fs/fisv/
 
-vocab_file: /data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz
+vocab_file: /data1/1/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz
 checkpoint_path:
 
 # multi batch size cause miss match

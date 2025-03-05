@@ -83,7 +83,7 @@ def train(cfg):
     else:
         num_tokens_per_video = 2
 
-    mmm = MMModel(cfg.embed_dim, cfg.content_length, cfg.vocab_size, cfg.num_blocks, cfg.num_heads, num_tokens_per_video).to(device)
+    mmm = MMModel(embed_dim = cfg.embed_dim, context_length = cfg.content_length, vocab_size = cfg.vocab_size, vaf_num_blocks = cfg.num_blocks, vaf_num_heads = cfg.num_heads, num_tokens_per_video = num_tokens_per_video,vocab_file = cfg.vocab_file).to(device)
     if cfg.checkpoint_path != None:
         logger.info(f"loading checkpoint from {cfg.checkpoint_path}")
         mmm.load_state_dict(torch.load(cfg.checkpoint_path))

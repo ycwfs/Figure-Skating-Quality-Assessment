@@ -187,5 +187,5 @@ class SimpleTokenizer(object):
 
 if __name__ == '__main__':
     import numpy as np
-    t = SimpleTokenizer("/data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz")
+    t = SimpleTokenizer("/data1/1/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz")
     print(t.prepare_input('How this figure skating competition perform? In this women short program competition, it can get a total element score of 38.67 and a total program component score of 33.88.',np.array([1,2,3]),np.array([1,2,3])))
