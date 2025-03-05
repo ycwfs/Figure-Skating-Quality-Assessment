@@ -2,7 +2,7 @@
 
 ## Overview of our method
 
-![img](asset/overview.png)
+![img](asset/overview.jpg)
 
 We begin by identifying sub-actions using the audio guide and constructing a series of multi-modal features. Next, we fuse the corresponding video and audio feature clips to generate fusion tokens. The input series is then concatenated with special tokens and a text prompt. After performing context representation learning, we are able to regress scores and generate evaluation texts.
 
