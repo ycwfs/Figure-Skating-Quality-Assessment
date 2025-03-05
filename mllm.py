@@ -24,10 +24,11 @@ class MMModel(nn.Module):
     def __init__(self, embed_dim: int = 1024, context_length: int = 100, vocab_size: int = 49413, num_blocks: int = 8, num_heads: int = 8, vaf_num_blocks: int = 8, vaf_num_heads: int = 8, num_tokens_per_video: int = 2):
         super().__init__()
 
-        self.st = SimpleTokenizer("/data1/1/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", context_length)
+        self.st = SimpleTokenizer("/data1/wangqiurui/code/helping/ImageBind/imagebind/bpe/bpe_simple_vocab_16e6.txt.gz", context_length)
         self.tes = self.st.tes_token
         self.pcs = self.st.pcs_token
 
+        # cross attention segmentation
         self.agl = AGL(embed_dim=embed_dim, num_blocks=16, num_heads=8, max_temporal_length=265)
 
         # vocab_size is 49413 (0 - 49412), special padding_idx????? don't influence the embedding, why not update????
@@ -121,12 +122,12 @@ class MMModel(nn.Module):
             fused_features[:, i, :] = self.vaf([stacked_video_segments[:, i, :].clone(), stacked_audio_segments[:, i, :].clone()])
 
         # add tes,pcs token
-        
         tes = self.token_embedding(torch.tensor(self.tes,dtype=torch.int32,device=self.token_embedding.weight.device))
         pcs = self.token_embedding(torch.tensor(self.pcs,dtype=torch.int32,device=self.token_embedding.weight.device))
         text = self.token_embedding(torch.cat([prompt_ids, input_ids], dim=1)).squeeze(0)
-        pad = self.token_embedding(torch.tensor(pad_ids,dtype=torch.int32,device=self.token_embedding.weight.device))
+        pad = self.token_embedding(pad_ids.clone().detach().to(dtype=torch.int32,device=self.token_embedding.weight.device))
 
+        # multi-model feature series construction
         t_len = text.shape[0]
         fused_features[:, nos, :] = tes
         fused_features[:, nos+1, :] = pcs
@@ -137,6 +138,7 @@ class MMModel(nn.Module):
         fused_features = fused_features + self.pos_embed
         # trunk [bs, embed_dim, seq_len]
         attn_mask = build_causal_attention_mask(self.context_length).to(fused_features.device)
+        # maksed transformer decoder
         hidden_state = self.mllm(fused_features, attn_mask)
 
         # use tes,pcs token to regression

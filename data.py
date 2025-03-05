@@ -91,18 +91,15 @@ class MMDataset(data.Dataset):
 
     def __getitem__(self, index):
         
-        # 加载视频特征（.npy 格式）
         video_dir = os.path.join(self.video_path, self.video_list[index] + '_rgb.npy')
         video_feature = torch.tensor(np.load(video_dir))
 
-        # 加载音频特征（.npy 格式）
         audio_dir = os.path.join(self.audio_path, self.video_list[index] + '_vggish.npy')
         audio_feature = torch.tensor(np.load(audio_dir))
 
         prompt_ids = torch.tensor(self.st.encode(self.prompt)).squeeze(0)
         pad_ids = torch.tensor([self.st.pad_token])
 
-        # 加载标签
         try:
             label_path = os.path.join(self.label_path, f'{self.video_list[index]}.json')
             with open(label_path, 'r') as f:

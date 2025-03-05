@@ -173,13 +173,9 @@ class SimpleTokenizer(object):
 
         clips = vf.shape[0]
         result = torch.zeros(context_length, dtype=torch.long)
-        #res = [clips * [video_token,audio_token] + [sot_token] + self.encode(t) + [eot_token] for t in texts]
         res =[]
         res.extend(clips * [self.video_token,self.audio_token] + [self.tes_token, self.pcs_token])
         res.extend([self.sot_token] + self.encode(texts) + [self.eot_token])
-        # test no text
-        #res.extend([self.pad_token] + len(self.encode(texts)) * [self.pad_token] + [self.pad_token])
-        #tes_pcs_index = [len(res)-2, len(res)-1]
 
         if len(res) < context_length:
             result[:len(res)] = torch.tensor(res)
@@ -188,33 +184,6 @@ class SimpleTokenizer(object):
             result = torch.tensor(res[:context_length])
 
         return result
-
-    # def __call__(self, texts, context_length=None):
-    #     if not context_length:
-    #         context_length = self.context_length
-
-    #     if isinstance(texts, str):
-    #         texts = [texts]
-
-    #     sot_token = self.encoder["<|startoftext|>"]
-    #     eot_token = self.encoder["<|endoftext|>"]
-    #     video_token = self.encoder["<video>"]
-    #     audio_token = self.encoder["<audio>"]
-    #     tes_token = self.encoder["<tes>"]
-    #     pcs_token = self.encoder["<pcs>"]
-    #     pad_token = self.encoder["<pad>"]
-
-    #     all_tokens = [[video_token] + [audio_token] + [sot_token] + self.encode(text) + [eot_token] for text in texts]
-    #     result = torch.zeros(len(all_tokens), context_length, dtype=torch.long)
-
-    #     for i, tokens in enumerate(all_tokens):
-    #         tokens = tokens[:context_length]
-    #         result[i, : len(tokens)] = torch.tensor(tokens)
-
-    #     if len(result) == 1:
-    #         return result[0]
-    #     return result
-
 
 if __name__ == '__main__':
     import numpy as np

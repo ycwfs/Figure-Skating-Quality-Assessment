@@ -4,22 +4,6 @@ import torch.nn as nn
 from functools import partial
 import numpy as np
 
-    # def get_segments(self, location, threshold=0.5):
-    #     binary_labels = (location > threshold).astype(int)
-    #     # 找到动作片段的起始和结束索引
-    #     segments = []
-    #     start = None
-    #     for i in range(len(binary_labels)):
-    #         if binary_labels[i] == 1 and start is None:
-    #             start = i  # 记录片段开始
-    #         elif binary_labels[i] == 0 and start is not None:
-    #             segments.append((start, i - 1))  # 记录片段结束
-    #             start = None
-
-    #     # 检查是否有正在进行的片段
-    #     if start is not None:
-    #         segments.append((start, len(binary_labels) - 1))
-
 class AGL(nn.Module):
     def __init__(self, embed_dim: int = 1024, num_blocks: int = 8, num_heads: int = 8, max_temporal_length: int = 265,  threshold: int = 0.6):
         super().__init__()
@@ -37,25 +21,6 @@ class AGL(nn.Module):
             nn.ReLU(),
             nn.Linear(int(embed_dim/2), embed_dim)
         )
-
-        # self.sa = SimpleTransformer(
-        #     embed_dim=embed_dim,
-        #     num_blocks=num_blocks,
-        #     ffn_dropout_rate=0.0,
-        #     drop_path_rate=0.1,
-        #     attn_target=partial(
-        #         MultiheadAttention,
-        #         embed_dim=embed_dim,
-        #         num_heads=num_heads,
-        #         bias=True,
-        #         add_bias_kv=True,
-        #     ),
-        #     pre_transformer_layer=nn.Sequential(
-        #         nn.LayerNorm(embed_dim, eps=1e-6),
-        #         nn.Identity(),
-        #         #EinOpsRearrange("b l d -> l b d"),
-        #     )
-        # )
 
         self.ca = SimpleTransformer(
                 embed_dim=embed_dim,
